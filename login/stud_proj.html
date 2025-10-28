@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Project Tracker - PROJX</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --bg1: #2e1f47;
+            --bg2: #c64c4c;
+            --card: rgba(88, 70, 150, 0.4);
+            --muted: rgba(255, 255, 255, 0.12);
+            --text: #fff;
+            --accent: #ffcc00;
+            --ok: #4caf50;
+            --danger: #ff4d4d;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg1), var(--bg2));
+            min-height: 100vh;
+            display: flex;
+        }
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            width: 100%;
+        }
+        .header {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-text h1 {
+            color: var(--text);
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+        .header-text p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+        #newProjectBtn {
+            background: var(--accent);
+            color: #111;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        #newProjectBtn:hover {
+            background: #e6b800;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: var(--card);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(120, 100, 180, 0.3);
+        }
+        .stat-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        #totalProjects, #activeProjects, #progressProjects, #completedProjects {
+            color: var(--text);
+            font-size: 36px;
+            font-weight: bold;
+        }
+        #activeProjects { color: #5dade2; }
+        #progressProjects { color: #f39c12; }
+        #completedProjects { color: #2ecc71; }
+        .search-filter {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            align-items: center;
+        }
+        #searchInput {
+            flex: 1;
+            background: var(--muted);
+            border: 1px solid rgba(120, 100, 180, 0.4);
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: var(--text);
+            font-size: 14px;
+        }
+        #searchInput::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .status-filter {
+            display: flex;
+            gap: 10px;
+            background: var(--muted);
+            padding: 5px;
+            border-radius: 8px;
+            border: 1px solid rgba(120, 100, 180, 0.4);
+        }
+        .status-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .status-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+        }
+        .status-btn.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--text);
+        }
+        #projectsGrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .project-card {
+            background: var(--card);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid rgba(120, 100, 180, 0.3);
+            transition: all 0.3s;
+        }
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+        .project-title {
+            color: var(--text);
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .project-description {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        .project-badges {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge.status-planning { background: #9b59b6; color: var(--text); }
+        .badge.status-in-progress { background: #5dade2; color: var(--text); }
+        .badge.status-testing { background: #f39c12; color: var(--text); }
+        .badge.status-completed { background: #2ecc71; color: var(--text); }
+        .badge.status-on-hold { background: #e74c3c; color: var(--text); }
+        .info-section {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+        }
+        .info-label {
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .update-section {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .update-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .update-display {
+            background: var(--muted);
+            padding: 12px;
+            border-radius: 6px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            border: 1px solid rgba(120, 100, 180, 0.4);
+        }
+        .eval-display {
+            background: rgba(46, 204, 113, 0.2);
+            padding: 12px;
+            border-radius: 6px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            border-left: 3px solid var(--ok);
+            margin-top: 10px;
+        }
+        .no-eval {
+            color: rgba(255, 255, 255, 0.5);
+            font-style: italic;
+        }
+        .progress-section {
+            margin-bottom: 20px;
+        }
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+        .progress-bar {
+            height: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #5dade2, #2ecc71);
+            border-radius: 4px;
+            transition: width 0.5s;
+        }
+        .project-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .update-btn {
+            background: #00bcd4;
+            color: var(--text);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .update-btn:hover {
+            background: #0097a7;
+            transform: scale(1.05);
+        }
+        .delete-btn {
+            background: var(--danger);
+            color: var(--text);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        .delete-btn:hover {
+            background: #e53935;
+            transform: scale(1.05);
+        }
+        #addProjectModal, #updateProjectModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        #addProjectModal.active, #updateProjectModal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: rgba(60, 45, 110, 0.98);
+            padding: 30px;
+            border-radius: 12px;
+            width: 500px;
+            max-width: 90%;
+            border: 1px solid rgba(120, 100, 180, 0.4);
+        }
+        .modal-header {
+            color: var(--text);
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .close {
+            color: rgba(255, 255, 255, 0.6);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 20px;
+        }
+        .close:hover {
+            color: var(--text);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        #title, #desc, #lastUpdate, #updateLastUpdate, #guideName, #currentStatus {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(120, 100, 180, 0.4);
+            border-radius: 8px;
+            background: var(--muted);
+            color: var(--text);
+            font-size: 14px;
+        }
+        #desc, #lastUpdate, #updateLastUpdate {
+            resize: vertical;
+            min-height: 80px;
+        }
+        #title::placeholder, #desc::placeholder, #lastUpdate::placeholder, #updateLastUpdate::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        #guideName option, #currentStatus option {
+            background: #3c2d6e;
+            color: var(--text);
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            background: #00bcd4;
+            color: var(--text);
+        }
+        .submit-btn:hover {
+            background: #0097a7;
+            transform: translateY(-2px);
+        }
+        .empty-state {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            padding: 60px 20px;
+            font-size: 16px;
+        }
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            #projectsGrid {
+                grid-template-columns: 1fr;
+            }
+            .main-content {
+                padding: 15px;
+            }
+            #newProjectBtn {
+                font-size: 14px;
+                padding: 10px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <div class="header">
+            <div class="header-text">
+                <h1>My Projects</h1>
+                <p>Track your project progress and updates</p>
+            </div>
+            <button id="newProjectBtn" onclick="openAddModal()">
+                <span>+</span> New Project
+            </button>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Projects</div>
+                <div class="stat-value" id="totalProjects">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Active</div>
+                <div class="stat-value active" id="activeProjects">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">In Progress</div>
+                <div class="stat-value progress" id="progressProjects">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Completed</div>
+                <div class="stat-value completed" id="completedProjects">0</div>
+            </div>
+        </div>
+        <div class="search-filter">
+            <input type="text" class="search-box" id="searchInput" placeholder="Search projects...">
+            <div class="status-filter">
+                <button class="status-btn active" data-status="All">All</button>
+                <button class="status-btn" data-status="Planning">Planning</button>
+                <button class="status-btn" data-status="In Progress">In Progress</button>
+                <button class="status-btn" data-status="Testing">Testing</button>
+                <button class="status-btn" data-status="Completed">Completed</button>
+                <button class="status-btn" data-status="On Hold">On Hold</button>
+            </div>
+        </div>
+        <div class="projects-grid" id="projectsGrid"></div>
+    </div>
+    <div id="addProjectModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddModal()">×</span>
+            <h2 class="modal-header">Add New Project</h2>
+            <form id="addProjectForm">
+                <div class="form-group">
+                    <label for="title">Project Title:</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="guideName">Guide Name:</label>
+                    <select id="guideName" name="guideName" required>
+                        <option value="">Select Guide</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="currentStatus">Status:</label>
+                    <select id="currentStatus" name="currentStatus" required>
+                        <option value="">Select Status</option>
+                        <option value="Planning">Planning</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Testing">Testing</option>
+                        <option value="Completed">Completed</option>
+                        <option value="On Hold">On Hold</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="desc">Description:</label>
+                    <textarea id="desc" name="desc" placeholder="Enter project description..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="lastUpdate">Last Update:</label>
+                    <textarea id="lastUpdate" name="lastUpdate" placeholder="Enter project update..." required></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Add Project</button>
+            </form>
+        </div>
+    </div>
+    <div id="updateProjectModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeUpdateModal()">×</span>
+            <h2 class="modal-header">Update Project</h2>
+            <form id="updateProjectForm">
+                <div class="form-group">
+                    <label for="updateLastUpdate">Last Update:</label>
+                    <textarea id="updateLastUpdate" name="lastUpdate" placeholder="Enter project update..." required></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Update Project</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        let currentEditId = null;
+        let guidesData = [];
+        let projects = [];
+        let CURRENT_STUDENT_ID;
+        let currentStatusFilter = 'All';
+        let searchTerm = '';
+
+        async function init() {
+            try {
+                const res = await fetch("/stud/get-user", { credentials: "include" });
+                if (!res.ok) throw new Error("Failed to fetch user");
+                const data = await res.json();
+                CURRENT_STUDENT_ID = data.studentID ;
+                console.log("Student ID:", CURRENT_STUDENT_ID);
+                await loadGuides();
+                await loadProjects();
+                setupEventListeners();
+                setInterval(loadProjects, 30000);
+            } catch (err) {
+                console.error("Error initializing:", err);
+                window.location.href = "/login.html";
+            }
+        }
+
+        function setupEventListeners() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', function(e) {
+                searchTerm = e.target.value.toLowerCase();
+                renderProjects();
+            });
+
+            const statusButtons = document.querySelectorAll('.status-btn');
+            statusButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    statusButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentStatusFilter = this.getAttribute('data-status');
+                    renderProjects();
+                });
+            });
+
+            const addModal = document.getElementById('addProjectModal');
+            const updateModal = document.getElementById('updateProjectModal');
+            addModal.addEventListener('click', function(e) {
+                if (e.target === addModal) closeAddModal();
+            });
+            updateModal.addEventListener('click', function(e) {
+                if (e.target === updateModal) closeUpdateModal();
+            });
+        }
+
+        async function loadGuides() {
+            try {
+                console.log("SID",CURRENT_STUDENT_ID);
+                const res = await fetch('/guides', { credentials: "include" });
+                if (!res.ok) throw new Error("Failed to fetch guides");
+                guidesData = await res.json();
+                const guideSelect = document.getElementById('guideName');
+                guideSelect.innerHTML = '<option value="">Select Guide</option>';
+                guidesData.forEach(guide => {
+                    const option = document.createElement('option');
+                    option.value = guide.guideID;
+                    option.textContent = guide.name;
+                    guideSelect.appendChild(option);
+                });
+            } catch (err) {
+                console.error("Error fetching guides:", err);
+            }
+        }
+
+        async function loadProjects() {
+            try {
+                const res = await fetch('/stud/projects', { credentials: "include" });
+                if (res.status === 401) {
+                    window.location.href = "/login.html";
+                    return;
+                }
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                const data = await res.json();
+                projects = data.filter(project => project.studentID === CURRENT_STUDENT_ID);
+                console.log("Projects:", projects);
+                renderProjects();
+            } catch (err) {
+                console.error("Error fetching projects:", err);
+            }
+        }
+
+        function renderProjects() {
+            const grid = document.getElementById('projectsGrid');
+            grid.innerHTML = '';
+            let filteredProjects = projects;
+
+            if (currentStatusFilter !== 'All') {
+                filteredProjects = filteredProjects.filter(p => p.currentStatus === currentStatusFilter);
+            }
+
+            if (searchTerm) {
+                filteredProjects = filteredProjects.filter(p => 
+                    p.title.toLowerCase().includes(searchTerm) || 
+                    p.desc.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (filteredProjects.length === 0) {
+                grid.innerHTML = '<div class="empty-state">No projects found</div>';
+                updateStats();
+                return;
+            }
+
+            filteredProjects.forEach(project => {
+                const card = createProjectCard(project);
+                grid.appendChild(card);
+            });
+
+            updateStats();
+        }
+
+        function createProjectCard(project) {
+            const statusClass = project.currentStatus.toLowerCase().replace('in progress', 'in-progress').replace('on hold', 'on-hold');
+            const card = document.createElement('div');
+            card.className = 'project-card';
+            card.innerHTML = `
+                <div class="project-title">${escapeHtml(project.title)}</div>
+                <div class="project-description">${escapeHtml(project.desc)}</div>
+                <div class="project-badges">
+                    <span class="badge status-${statusClass}">
+                        ${escapeHtml(project.currentStatus)}
+                    </span>
+                </div>
+                <div class="info-section">
+                    <div class="info-row">
+                        <span class="info-label">Last Update:</span>
+                        <span>${escapeHtml(project.lastUpdate) || 'N/A'}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Completion:</span>
+                        <span>${project.percentage}%</span>
+                    </div>
+                </div>
+                <div class="update-section">
+                    <span class="update-label">Guide Evaluation:</span>
+                    <div class="eval-display ${!project.lastEval || project.lastEval === 'Evaluation Pending' ? 'no-eval' : ''}">
+                        ${escapeHtml(project.lastEval) || 'Evaluation Pending'}
+                    </div>
+                </div>
+                <div class="progress-section">
+                    <div class="progress-header">
+                        <span>Progress</span>
+                        <span>${project.percentage}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${project.percentage}%"></div>
+                    </div>
+                </div>
+                <div class="project-footer">
+                    <button class="update-btn" onclick="updateProject('${project._id}')">Update Progress</button>
+                    <button class="delete-btn" onclick="deleteProject('${project._id}')">Delete</button>
+                </div>
+            `;
+            return card;
+        }
+
+        function updateStats() {
+            document.getElementById('totalProjects').textContent = projects.length;
+            document.getElementById('activeProjects').textContent = 
+                projects.filter(p => p.currentStatus !== 'Completed').length;
+            document.getElementById('progressProjects').textContent = 
+                projects.filter(p => p.currentStatus === 'In Progress').length;
+            document.getElementById('completedProjects').textContent = 
+                projects.filter(p => p.currentStatus === 'Completed').length;
+        }
+
+        function openAddModal() {
+            document.getElementById('addProjectForm').reset();
+            document.getElementById('addProjectModal').classList.add('active');
+        }
+
+        function closeAddModal() {
+            document.getElementById('addProjectModal').classList.remove('active');
+        }
+
+        function updateProject(projectId) {
+            currentEditId = projectId;
+            document.getElementById('updateLastUpdate').value = '';
+            document.getElementById('updateProjectModal').classList.add('active');
+        }
+
+        function closeUpdateModal() {
+            document.getElementById('updateProjectModal').classList.remove('active');
+            currentEditId = null;
+        }
+
+        async function deleteProject(projectId) {
+            if (confirm('Are you sure you want to delete this project?')) {
+                try {
+                    const res = await fetch(`stud/projects/${projectId}`, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+                    if (res.ok) {
+                        await loadProjects();
+                        alert('Project deleted successfully!');
+                    } else {
+                        throw new Error('Failed to delete project');
+                    }
+                } catch (err) {
+                    console.error("Error deleting project:", err);
+                    alert('Error deleting project!');
+                }
+            }
+        }
+
+        document.getElementById('addProjectForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const projectData = {
+                title: formData.get('title'),
+                guideID: formData.get('guideName'),
+                studentID: CURRENT_STUDENT_ID,
+                currentStatus: formData.get('currentStatus'),
+                desc: formData.get('desc'),
+                percentage: 0,
+                lastUpdate: formData.get('lastUpdate'),
+                lastEval: 'Evaluation Pending'
+            };
+
+            try {
+                const res = await fetch('/stud/projects', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(projectData)
+                });
+                if (res.ok) {
+                    closeAddModal();
+                    await loadProjects();
+                    alert('Project added successfully!');
+                } else {
+                    throw new Error('Failed to save project');
+                }
+            } catch (err) {
+                console.error("Error saving project:", err);
+                alert('Error saving project!');
+            }
+        });
+
+        document.getElementById('updateProjectForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const updateData = {
+                lastUpdate: formData.get('lastUpdate')
+            };
+
+            try {
+                const res = await fetch(`stud/projects/${currentEditId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(updateData)
+                });
+                if (res.ok) {
+                    closeUpdateModal();
+                    await loadProjects();
+                    alert('Project updated successfully!');
+                } else {
+                    throw new Error('Failed to update project');
+                }
+            } catch (err) {
+                console.error("Error updating project:", err);
+                alert('Error updating project!');
+            }
+        });
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, m => map[m]);
+        }
+
+        init();
+    </script>
+</body>
+</html>

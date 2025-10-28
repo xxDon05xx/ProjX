@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gradient Calendar with Remainders</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #2e1f47, #c64c4c);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 170px;
+      position: relative; /* allow animated diamonds to float behind content. */
+      overflow: hidden;   
+    }
+
+   
+    .diamond {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.135);
+      transform: rotate(45deg);
+      animation: floatDiamond 10s infinite linear; /*applies motion */
+      z-index: 0;
+    }
+
+    @keyframes floatDiamond {
+      0% { transform: rotate(45deg) translateY(0); opacity: 0.5; }
+      50% { transform: rotate(45deg) translateY(-40px); opacity: 0.7; }
+      100% { transform: rotate(45deg) translateY(0); opacity: 0.5; }
+    }
+
+    
+    .diamond:nth-child(1)  { width: 30px; height: 30px; top: 5%; left: 5%; animation-delay: 0s; }
+    .diamond:nth-child(2)  { width: 40px; height: 40px; top: 10%; left: 90%; animation-delay: 1s; }
+    .diamond:nth-child(3)  { width: 25px; height: 25px; top: 85%; left: 10%; animation-delay: 2s; }
+    .diamond:nth-child(4)  { width: 35px; height: 35px; top: 80%; left: 85%; animation-delay: 3s; }
+    .diamond:nth-child(5)  { width: 50px; height: 50px; top: 20%; left: 5%; animation-delay: 4s; }
+    .diamond:nth-child(6)  { width: 20px; height: 20px; top: 75%; left: 95%; animation-delay: 5s; }
+    .diamond:nth-child(7)  { width: 45px; height: 45px; top: 0%; left: 50%; animation-delay: 6s; }
+    .diamond:nth-child(8)  { width: 30px; height: 30px; top: 100%; left: 50%; animation-delay: 7s; }
+    .diamond:nth-child(9)  { width: 35px; height: 35px; top: 40%; left: 0%; animation-delay: 8s; }
+    .diamond:nth-child(10) { width: 25px; height: 25px; top: 60%; left: 100%; animation-delay: 9s; }
+    .diamond:nth-child(11) { width: 40px; height: 40px; top: 5%; left: 70%; animation-delay: 10s; }
+    .diamond:nth-child(12) { width: 30px; height: 30px; top: 95%; left: 30%; animation-delay: 11s; }
+    .diamond:nth-child(13) { width: 20px; height: 20px; top: 30%; left: 100%; animation-delay: 12s; }
+    .diamond:nth-child(14) { width: 30px; height: 30px; top: 70%; left: 0%; animation-delay: 13s; }
+    .diamond:nth-child(15) { width: 50px; height: 50px; top: 10%; left: 30%; animation-delay: 14s; }
+    .diamond:nth-child(16) { width: 40px; height: 40px; top: 90%; left: 70%; animation-delay: 15s; }
+    .diamond:nth-child(17) { width: 25px; height: 25px; top: 50%; left: 5%; animation-delay: 16s; }
+    .diamond:nth-child(18) { width: 35px; height: 35px; top: 50%; left: 95%; animation-delay: 17s; }
+    .diamond:nth-child(19) { width: 30px; height: 30px; top: 15%; left: 50%; animation-delay: 18s; }
+    .diamond:nth-child(20) { width: 30px; height: 30px; top: 85%; left: 50%; animation-delay: 19s; }
+    .diamond:nth-child(21) { width: 40px; height: 40px; top: 50%; left: 85%; animation-delay: 20s; }
+
+    .container {
+      display: flex;  /* Flexbox layout: calendar + reminders box side by side.*/
+      gap: 20px;
+      position: relative;
+      z-index: 1; /*the box stays above diamonds.*/
+    }
+
+    .calendar {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .calendar-header {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    select {
+      background: #f97b7b;
+      color: white;
+      border: none;
+      padding: 5px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      text-align: center;
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    th {
+      color: #ccc;
+    }
+
+    td:hover {
+      background: #e96a6a;
+    }
+
+    .has-reminder { /*highlights dates that have reminders.*/
+      background-color: #f97b7b;
+      border-radius: 50%;
+    }
+.selected-date {
+  background-color:rgba(255, 255, 255, 0.135); /* color of selected date */
+  border-radius: 50%;
+  color: #fff;
+}
+
+    .reminders {
+      background:rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 10px;
+      width: 250px;
+    }
+
+    .reminder-item { /*text and delete button*/
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 5px;
+      border-radius: 5px;
+      margin-bottom: 5px;
+    }
+
+    .remove-btn {
+      background: #e96a6a;
+      color: white;
+      border: none;
+      padding: 3px 6px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .remove-btn:hover {
+      background: #f97b7b;
+    }
+
+    .back-btn { /*link to dash*/
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #fff;
+  color: #222;
+  font-weight: 600;
+  cursor: pointer;
+}
+.back-btn:hover {
+  background: #ddd;
+}
+
+  </style>
+</head>
+<body>
+
+
+<div class="diamond"></div>
+<div class="diamond"></div>
+<div class="diamond"></div>
+<div class="diamond"></div>
+<div class="diamond"></div>
+<div class="diamond"></div>
+<div class="diamond"></div>
+<div class="diamond"></div>
+<div class="diamond"></div>
+<div class="diamond"></div>
+<div class="diamond"></div>
+<div class="diamond"></div>
+<div class="diamond"></div>
+<div class="diamond"></div>
+<div class="diamond"></div>
+<div class="diamond"></div>
+<div class="diamond"></div>
+<div class="diamond"></div>
+<div class="diamond"></div>
+<div class="diamond"></div>
+<div class="diamond"></div>
+
+<button class="back-btn" onclick="window.location.href='stud_dash.html'"
+        style="position:absolute; top:15px; right:15px; padding:8px 12px; border:none; border-radius:6px;
+               background:rgba(255, 255, 255, 0.1); color:white; font-weight:600;"> Back to dashboard
+</button>
+
+<div class="container">
+  <div class="calendar">
+    <div class="calendar-header">
+      <select id="month"></select>
+      <select id="year"></select>
+    </div>
+    <table id="calendar-body"></table>
+  </div>
+
+  <div class="reminders">
+    <h3>Reminders</h3>
+    <div id="reminder-list"></div>
+    <input type="text" id="reminder-input" placeholder="Add reminder">
+    <button onclick="addReminder()">Add</button>
+  </div>
+</div>
+
+<script>
+  const calendarBody = document.getElementById("calendar-body");
+  const monthSelect = document.getElementById("month");
+  const yearSelect = document.getElementById("year");
+  const reminderList = document.getElementById("reminder-list");
+  const reminderInput = document.getElementById("reminder-input");
+
+  let reminders = {}; //object to store reminders
+  let selectedDate = null; 
+
+  function generateCalendar(month, year) {
+    const months = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+
+    calendarBody.innerHTML = "";
+    let firstDay = new Date(year, month).getDay();
+    let daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    //Creates the table header row with day names.
+    let row = "<tr>";
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    days.forEach(day => {
+      row += `<th>${day}</th>`;
+    });
+    row += "</tr>";
+    calendarBody.innerHTML += row;
+    
+    //Adds empty cells before the first day of the month, so dates line up correctly.
+    row = "<tr>";
+    for (let i = 0; i < firstDay; i++) {
+      row += "<td></td>";
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      let dateKey = `${day}-${month}-${year}`;
+      let highlightClass = reminders[dateKey] ? "has-reminder" : "";
+      row += `<td class="${highlightClass}" onclick="selectDate(${day}, ${month}, ${year})">${day}</td>`;
+
+      if ((day + firstDay) % 7 === 0) {
+        row += "</tr><tr>";
+      }
+    }
+
+    row += "</tr>";
+    calendarBody.innerHTML += row;
+  }
+
+  function populateSelectors() {
+    const months = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+
+    months.forEach((m, i) => {
+      let option = document.createElement("option");
+      option.value = i;
+      option.text = m;
+      monthSelect.appendChild(option);
+    });
+
+    // 10 years before and after
+    const currentYear = new Date().getFullYear();
+    for (let y = currentYear - 10; y <= currentYear + 10; y++) {
+      let option = document.createElement("option");
+      option.value = y;
+      option.text = y;
+      yearSelect.appendChild(option);
+    }
+  }
+
+  let previouslySelectedCell = null; 
+function selectDate(day, month, year) {
+  selectedDate = `${day}-${month}-${year}`;
+
+  // Remove previous selection
+  if (previouslySelectedCell) {
+    previouslySelectedCell.classList.remove("selected-date");
+  }
+
+  // Find the clicked cell
+  previouslySelectedCell = Array.from(calendarBody.querySelectorAll("td"))
+    .find(td => td.textContent == day && !isNaN(td.textContent));
+
+  if (previouslySelectedCell) {
+    previouslySelectedCell.classList.add("selected-date");
+  }
+
+  displayReminders();
+}
+
+ async function addReminder() {
+    if (!selectedDate) return alert("Please select a date first!");
+    //If no date is selected TELL the user.
+    let text = reminderInput.value.trim();
+    if (text === "") return;
+    if (!reminders[selectedDate]) reminders[selectedDate] = [];
+    reminders[selectedDate].push(text);
+    reminderInput.value = ""; //Clear the text box after adding.
+localStorage.setItem("projx_reminders", JSON.stringify(reminders));
+reminders = JSON.parse(localStorage.getItem("projx_reminders")) || {};
+  const [day, month, year] = selectedDate.split("-").map(Number);
+    try {
+  const response = await fetch("/reminders", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ day: day, month: month, year: year, reminder: text })
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error("Server error:", errorData.message || response.statusText);
+    alert("Failed to save reminder on server!");
+  } else {
+    const data = await response.json();
+    console.log("Reminder saved successfully with ID:", data.id);
+  }
+} catch (err) {
+  console.error("Network or fetch error:", err);
+  alert("Unable to reach server. Reminder saved locally.");
+}
+
+    generateCalendar(monthSelect.value, yearSelect.value);
+    displayReminders();
+  }
+
+async function removeReminder(id, day, month, year) {
+  try {
+    const res = await fetch(`/reminders/${id}`, {
+      method: "DELETE"
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      // Refresh reminders list
+      await displayReminders();
+
+      // Check if that date still has reminders
+      const response = await fetch("/reminders");
+      const allReminders = await response.json();
+
+      const remindersForDate = allReminders.filter(r => 
+        r.day === day && r.month === month && r.year === year
+      );
+
+      if (remindersForDate.length === 0) {
+        // Remove highlight if no reminders left
+        const dateCell = document.querySelector(
+          `[data-date='${day}-${month}-${year}']`
+        );
+        if (dateCell) {
+          dateCell.classList.remove("highlight");
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Error deleting reminder:", err);
+  }
+}
+
+
+  async function displayReminders() {
+  reminderList.innerHTML = "";
+  if (!selectedDate) return;
+
+  // Extract day, month, year from selectedDate
+  const [day, month, year] = selectedDate.split("-").map(Number);
+
+  try {
+    // Fetch reminders for the selected date from the server
+    const response = await fetch(`/reminders`);
+    if (!response.ok) throw new Error("Failed to fetch reminders");
+
+    const allReminders = await response.json();
+    
+    // Filter reminders for the selected date
+    const remindersForDate = allReminders.filter(r => 
+      r.day === day && r.month === month && r.year === year
+    );
+
+    // Display them
+    remindersForDate.forEach((reminder, index) => {
+      reminderList.innerHTML += `
+        <div class="reminder-item">
+          <span>${reminder.reminder}</span>
+          <button class="remove-btn" onclick="removeReminder('${reminder._id}')">X</button>
+        </div>
+      `;
+      console.log(`reminder ${index} displayed `);
+    });
+
+  } catch (err) {
+    console.error("Error fetching reminders:", err);
+    reminderList.innerHTML = "<p>Unable to load reminders from server.</p>";
+  }
+}
+
+
+  monthSelect.addEventListener("change", () => {
+    generateCalendar(parseInt(monthSelect.value), parseInt(yearSelect.value));
+  });
+ //when chooses another month , regeneate the calendar.
+  yearSelect.addEventListener("change", () => {
+    generateCalendar(parseInt(monthSelect.value), parseInt(yearSelect.value));
+  });
+
+  populateSelectors();
+  let now = new Date();
+  monthSelect.value = now.getMonth();
+  yearSelect.value = now.getFullYear();
+  generateCalendar(now.getMonth(), now.getFullYear());
+
+  // Generate the calendar for current month/year.
+</script>
+
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PROJX Sign Up</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <style>
+    @keyframes floatDiamond {
+      0% { transform: translateY(0); opacity: 0.5; }
+      50% { transform:translateY(-40px); opacity: 0.7; }
+      100% { transform: translateY(0); opacity: 0.5; }
+    }
+    .animate-floatDiamond {
+      animation: floatDiamond 10s infinite linear;
+    }
+  </style>
+</head>
+<body class="m-0 font-sans bg-gradient-to-br from-[#c64c4c] to-[#2e1f47] h-screen overflow-hidden relative flex justify-center items-center">
+  <!-- Floating Diamonds -->
+  <div id="diamond" class="absolute inset-0 overflow-hidden"></div>
+  
+  <!-- Sign Up Box -->
+  <div class="w-[700px] flex h-[500px] rounded-xl backdrop-blur-md shadow-lg overflow-hidden bg-white/5 z-10">
+    <!-- Left side -->
+    <div class="bg-[#3a254f] flex-1 flex flex-col justify-center items-center text-[#f97b7b]">
+      <div class="w-[120px] h-[120px] flex text-left rounded-full mb-6 bg-[radial-gradient(circle_at_30%_30%,_#f97b7b,_#d04949)]">
+        <h1 class="text-8xl tracking-[4px] absolute text-white font-bold ml-6 mt-2.5">P</h1>
+        <h1 class="text-7xl tracking-[4px] absolute ml-16 mt-8 text-red-700 font-bold">x</h1>
+      </div>
+      <h1 class="text-2xl tracking-[4px] font-bold">PROJX</h1>
+    </div>
+
+    <!-- Right side -->
+    <div class="flex-1 bg-white/10 backdrop-blur-xl flex flex-col justify-center p-10 text-white">
+      <form id="signupForm" class="flex flex-col">
+        
+        <input type="text" id="name" placeholder="Full Name" required
+          class="bg-transparent border-b border-gray-400 text-white placeholder-gray-400 focus:outline-none py-2 my-2 text-sm" />
+
+         <input type="text" id="roll" placeholder="Roll Number" required
+          class="bg-transparent border-b border-gray-400 text-white placeholder-gray-400 focus:outline-none py-2 my-2 text-sm" />
+
+
+        <input type="password" id="password" placeholder="Password" required
+          class="bg-transparent border-b border-gray-400 text-white placeholder-gray-400 focus:outline-none py-2 my-2 text-sm" />
+
+        <input type="password" id="confirmPassword" placeholder="Confirm Password" required
+          class="bg-transparent border-b border-gray-400 text-white placeholder-gray-400 focus:outline-none py-2 my-2 text-sm" />
+
+       <select id="course" required
+          class="bg-transparent border-b border-gray-400 text-white focus:outline-none py-2 my-2 text-sm">
+          <option value="" disabled selected class="text-gray-600">Select Course</option>
+          <option value="BSc">B.Sc</option>
+          <option value="BCom">B.Com</option>
+          <option value="BA">B.A</option>
+          <option value="BTech">B.Tech</option>
+          <option value="MSc">M.Sc</option>
+          <option value="MCA">MCA</option>
+          <option value="MBA">MBA</option>
+        </select>
+
+        <!-- Department Dropdown -->
+        <select id="department" required
+          class="bg-transparent border-b border-gray-400 text-white focus:outline-none py-2 my-2 text-sm">
+          <option value="" disabled selected class="text-gray-600">Select Department</option>
+          <option value="CSE">Computer Science</option>
+          <option value="ECE">Electronics</option>
+          <option value="EEE">Electrical</option>
+          <option value="ME">Mechanical</option>
+          <option value="CE">Civil</option>
+          <option value="IT">Information Technology</option>
+          <option value="Maths">Mathematics</option>
+          <option value="Physics">Physics</option>
+          <option value="Chemistry">Chemistry</option>
+        </select>
+
+        <div class="flex justify-between mt-6 space-x-3">
+          <button type="button" onclick="signUp()"
+            class="w-full bg-[#f97b7b] hover:bg-[#e96a6a] text-white font-bold py-2 rounded transition transform hover:-translate-y-1">
+            SignUp
+          </button>
+        </div>
+
+        <p id="message" class="text-yellow-300 text-sm mt-2"></p>
+      </form>
+      <a href="login.html" class="mt-4 text-xs text-gray-300 hover:underline">Already have an account? Login</a>
+    </div>
+  </div>
+
+  <script src="signup.js"></script>
+</body>
+</html>

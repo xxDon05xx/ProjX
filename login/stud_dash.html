@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROJX Dashboard</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg1:#2e1f47; --bg2:#c64c4c;
+    --card: rgba(0,0,0,0.25); --muted: rgba(255,255,255,0.12);
+    --text:#fff; --accent:#ffcc00; --ok:#4caf50; --danger:#ff4d4d;
+  }
+  body {
+    font-family: 'Poppins', sans-serif;
+    display:flex; min-height:100vh; color:var(--text);
+    background: linear-gradient(135deg, var(--bg1), var(--bg2));
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  #diamonds-container {
+    position: absolute; top:0; left:0; width:100%; height:100%; overflow:hidden; z-index:0;
+    pointer-events:none;
+  }
+  .diamond {
+    position: absolute;
+    background: rgba(255,255,255,0.1);
+    transform: rotate(45deg);
+    border: 1px solid rgba(255,255,255,0.2);
+    animation-name: floatUp;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(100vh) rotate(45deg); opacity:0; }
+    10% { opacity:0.5; }
+    50% { opacity:0.2; }
+    100% { transform: translateY(-10vh) rotate(45deg); opacity:0; }
+  }
+
+  .sidebar {
+    width: 240px; padding: 22px;
+    background: linear-gradient(180deg, #26183e, #3c2a63);
+    box-shadow: 2px 0 8px rgba(0,0,0,0.35);
+    z-index: 1;
+    position: relative;
+  }
+  .sidebar h2 { text-align:center; margin-bottom:26px; letter-spacing:.5px; }
+  .sidebar ul { list-style:none; display:grid; gap:10px; }
+  .sidebar li {
+    padding: 12px 14px; border-radius:10px; background:var(--muted);
+    cursor:pointer; transition:.25s transform, .25s background;
+  }
+  .sidebar li:hover { transform: translateX(6px); background: rgba(255,255,255,0.25); }
+
+  /* Main */
+  .main { flex:1; padding:22px; display:flex; flex-direction:column; gap:20px; z-index:1; position: relative; }
+  .topbar { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .topbar h1 { font-size:26px; font-weight:700; }
+
+  .content { display:grid; grid-template-columns:1fr; gap:30px; }
+
+  .card {
+    background: var(--card); padding:18px; border-radius:14px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25); backdrop-filter: blur(6px);
+    position: relative;
+    z-index: 1;
+  }
+  .card h2 { margin-bottom:12px; font-size:18px; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; }
+
+  .project-form input, .project-form select {
+    padding:9px 10px; border:none; border-radius:8px; background:rgba(255,255,255,0.12); color:#fff;
+  }
+  .project-form button { padding:9px 12px; border:none; border-radius:8px; cursor:pointer; background:#2fd1a2; color:#111; font-weight:700; }
+  .projects-list { display:grid; gap:10px; margin-top:12px; }
+  .project-item {
+    display:flex; justify-content:space-between; align-items:center; padding:12px; border-radius:10px; background:rgba(255,255,255,0.10);
+    transition:.25s transform, .25s background;
+  }
+  .project-item:hover { transform: scale(1.01); background: rgba(255,255,255,0.18); }
+  .actions { display:flex; gap:8px; }
+  .btn { border:none; border-radius:8px; padding:6px 10px; cursor:pointer; font-weight:600; }
+  .btn-edit { background:#ffd166; color:#222; }
+  .btn-del { background:var(--danger); color:#fff; }
+
+  .task-input { display:flex; gap:15px; }
+  .task-input input { flex:1; padding:9px 10px; border:none; border-radius:8px; background:rgba(255,255,255,0.12); color:#fff; }
+  .task-input button { padding:9px 12px; border:none; border-radius:8px; background:#2fd1a2; color:#111; font-weight:700; cursor:pointer; }
+  .tasks-list { list-style:none; display:grid; gap:8px; margin-top:20px; }
+  .tasks-list li {
+    display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:8px; background:rgba(255,255,255,0.10);
+  }
+  .pill { background:#00000055; border-radius:999px; padding:2px 8px; font-size:12px; margin-left:8px; }
+  .x { background:var(--danger); color:#fff; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; }
+
+  @media (max-width: 900px) {
+    .content { grid-template-columns: 1fr; }
+    .sidebar { width:200px; }
+  }
+</style>
+</head>
+<body>
+
+  <div id="diamonds-container"></div>
+
+  <aside class="sidebar">
+    <h2>PROJX</h2>
+    <ul>
+      <li id="DashBtn">Dashboard</li>
+      <li id="ProjBtn">Projects</li>
+      <li id="calendarBtn">Calendar</li>
+      <li id="aboutBtn">About Us</li>
+      <li id="logoutBtn">Logout</li>
+    </ul>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <h1 id="welcome">WELCOME</h1>
+    </div>
+
+    <section class="content">
+    
+      <div class="card">
+        <h2>Projects</h2>
+        <form id="projectForm" class="project-form row">
+          <!-- <input id="projName" type="text" placeholder="Project name" required>
+          <select id="projStatus" required>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+            <option value="Pending">Pending</option>
+          </select> -->
+          <!-- <button type="submit">Add Project</button> -->
+        </form>
+        <div id="projectsList" class="projects-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>To-Do List</h2>
+        <div class="task-input">
+          <input id="taskInput" type="text" placeholder="Add task">
+          <button id="addTaskBtn" type="button">Add</button>
+        </div>
+        <ul id="tasksList" class="tasks-list"></ul>
+      </div>
+    </section>
+    <div class="card">
+  <h2>Announcements</h2>
+  <div id="announcementBox" style="margin-top:10px; line-height:1.5;">
+  </div>
+  <div class="task-input" style="margin-top:15px;">
+  </div>
+  <ul id="announcementList" class="tasks-list"></ul>
+</div>
+
+  </main>
+
+  <div id="aboutModal" class="card" 
+       style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+              width:320px; display:none; z-index:999; background:var(--card); padding:20px;">
+    <h2>About Us</h2>
+    <p style="margin-top:10px; line-height:1.4;">
+     PROJX is a simple platform to manage projects and tasks. 
+     Organize your work, track progress, and stay productive — all in one place.
+    </p>
+    <button id="closeAbout" class="cal-btn" style="margin-top:14px;">Close</button>
+  </div>
+
+<script>
+  const LS_KEYS = { PROJECTS:'projx_projects_v1', TASKS:'projx_tasks_v1' }; //local storage keys 
+  const load = (k,f)=>{ try{return JSON.parse(localStorage.getItem(k))??f}catch{return f} };
+  const save = (k,v)=>localStorage.setItem(k,JSON.stringify(v));
+
+  //to load from local storage
+
+  let projects = load(LS_KEYS.PROJECTS, []);
+  let tasks = load(LS_KEYS.TASKS, []);
+
+  const projectsListEl=document.getElementById('projectsList'); //where you want to show your projects list
+  const projectForm=document.getElementById('projectForm');//when a user adds a new project
+  const projName=document.getElementById('projName');
+  const projStatus=document.getElementById('projStatus');
+   
+fetch("/get-user", { credentials: "include" })
+  .then(res => res.json())
+  .then(data => {
+    //console.log("Student name:", data.name);
+    document.getElementById("welcome").innerText = "WELCOME, " + data.name;
+  })
+  .catch(err => console.error(err)); 
+
+// Run this on page load
+async function loadAnnouncements() {
+  try {
+    const res = await fetch(`/announcements`, { credentials: "include" });
+    if (!res.ok) throw new Error("Failed to fetch announcements");
+    
+    const data = await res.json(); // Array of announcements
+    displayAnnouncements(data);
+  } catch (err) {
+    console.error("Error fetching announcements:", err);
+  }
+}
+
+function displayAnnouncements(announcements) {
+  const annListEl = document.getElementById("announcementList");
+  annListEl.innerHTML = ""; // Clear previous list
+
+  if (announcements.length === 0) {
+    annListEl.innerHTML = "<p>No announcements yet.</p>";
+    return;
+  }
+
+  announcements.forEach(ann => {
+    const li = document.createElement("li");
+    li.textContent = `${ann.guide_id}: ${ann.announcement_text}`;
+    annListEl.appendChild(li);
+  });
+}
+//projects
+// ================== PROJECTS ==================
+
+
+// Load projects from database
+async function loadProjects() {
+  try {
+    console.log("HIIII");
+    const res = await fetch(`/stud/projects/`);
+    projects = await res.json();
+    renderProjects();
+    updateStats();
+  } catch (err) {
+    console.error("Error loading projects:", err);
+  }
+}
+
+// Render Projects
+function renderProjects(filter = "") {
+  const list = document.getElementById("projectsList");
+  list.innerHTML = "";
+  
+  let filtered = projects;
+  if (filter) {
+    filtered = projects.filter(p =>
+      p.Title.toLowerCase().includes(filter.toLowerCase())
+    );
+  }
+  
+  if (filtered.length === 0 && filter) {
+    alert("No projects found!");
+    return;
+  }
+  
+  filtered.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "project-item";
+    div.innerHTML = `
+      <div>
+        <strong>${p.title}</strong> 
+        <span class="pill">${p.currentStatus}</span>
+      </div>
+      <div>${p.percentage}%</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+// Search project
+async function searchProject() {
+  const searchTerm = document.getElementById("projectName").value.trim();
+  
+  if (!searchTerm) {
+    loadProjects(); // Load all if search is empty
+    return;
+  }
+  
+  try {
+    const res = await fetch(`${API_BASE}/projects/search?name=${encodeURIComponent(searchTerm)}`);
+    projects = await res.json();
+    renderProjects();
+    updateStats();
+  } catch (err) {
+    console.error("Error searching projects:", err);
+  }
+}
+
+
+
+
+
+    
+  // function renderProjects(filter=''){
+  //   projectsListEl.innerHTML='';
+  //   const f=filter.toLowerCase();
+  //   projects.filter(p=>p.name.toLowerCase().includes(f)||p.status.toLowerCase().includes(f))
+  //     .forEach(p=>{
+  //       const row=document.createElement('div'); row.className='project-item';
+  //       const left=document.createElement('div'); left.innerHTML=`<strong>${p.name}</strong> <span class="pill">${p.status}</span>`;
+  //       const act=document.createElement('div'); act.className='actions';
+  //       const edit=Object.assign(document.createElement('button'), {className:'btn btn-edit', textContent:'Edit'});
+  //       const del=Object.assign(document.createElement('button'), {className:'btn btn-del', textContent:'Delete'});
+  //       edit.onclick=()=>{
+  //         const newName=prompt('Rename project:',p.name); if(!newName) return;
+  //         const newStatus=prompt('Update status (In Progress/Completed/Pending):',p.status); if(!newStatus) return;
+  //         p.name=newName.trim(); p.status=newStatus.trim();
+  //         save(LS_KEYS.PROJECTS,projects); renderProjects('');
+  //       };
+  //       del.onclick=()=>{ projects=projects.filter(x=>x.id!==p.id); save(LS_KEYS.PROJECTS,projects); renderProjects(''); };
+  //       act.append(edit,del); row.append(left,act); projectsListEl.appendChild(row);
+  //     });
+  // }
+  // projectForm.onsubmit=(e)=>{ e.preventDefault(); projects.push({id:crypto.randomUUID(),name:projName.value.trim(),status:projStatus.value}); projName.value=''; save(LS_KEYS.PROJECTS,projects); renderProjects(''); };
+
+  const tasksListEl=document.getElementById('tasksList');
+  const taskInput=document.getElementById('taskInput');
+  document.getElementById('addTaskBtn').onclick=addTask;
+  function addTask(){
+    const text=taskInput.value.trim(); if(!text) return;
+    tasks.push({id:crypto.randomUUID(),text}); save(LS_KEYS.TASKS,tasks); taskInput.value=''; renderTasks('');
+  }
+  function renderTasks(filter=''){
+    tasksListEl.innerHTML=''; const f=filter.toLowerCase();
+    tasks.filter(t=>t.text.toLowerCase().includes(f)).forEach(t=>{
+      const li=document.createElement('li'); const left=document.createElement('div'); left.textContent=t.text;
+      const rm=Object.assign(document.createElement('button'),{className:'x',textContent:'×'});
+      rm.onclick=()=>{ tasks=tasks.filter(x=>x.id!==t.id); save(LS_KEYS.TASKS,tasks); renderTasks(''); };
+      li.append(left,rm); tasksListEl.appendChild(li);
+    });
+  }
+
+  renderProjects(); renderTasks();
+
+  document.getElementById('aboutBtn').onclick=()=>{document.getElementById('aboutModal').style.display='block';};
+  document.getElementById('closeAbout').onclick=()=>{document.getElementById('aboutModal').style.display='none';};
+
+  const container=document.getElementById('diamonds-container');
+  const diamondCount=100;
+  for(let i=0;i<diamondCount;i++){
+    const d=document.createElement('div'); d.className='diamond';
+    const size=Math.random()*15+10; d.style.width=size+'px'; d.style.height=size+'px';
+    d.style.left=Math.random()*100+'%';
+    d.style.animationDuration=(Math.random()*15+10)+'s';
+    d.style.animationDelay=(-Math.random()*20)+'s';
+    container.appendChild(d);
+  }
+
+
+const LS_ANNOUNCEMENTS = "projx_announcements_v1";
+let announcements = load(LS_ANNOUNCEMENTS, []);
+
+const annInput = document.getElementById("announcementInput");
+const annListEl = document.getElementById("announcementList");
+
+// Auto-load on page ready
+window.addEventListener("DOMContentLoaded", () => {
+  loadAnnouncements();
+  loadProjects();
+});
+
+</script>
+
+  <script>
+    document.getElementById("calendarBtn").onclick = () => {
+      window.location.href = "Calendar.html";};
+      document.getElementById("DashBtn").onclick = () => {
+      window.location.href = "stud_dash.html";};
+      document.getElementById("ProjBtn").onclick = () => {
+      window.location.href = "stud_proj.html";};
+      document.getElementById("logoutBtn").onclick = () => {
+      window.location.href = "login.html";
+    };
+  </script>
+</body>
+</html>
+
+
+

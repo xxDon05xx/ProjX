@@ -1,0 +1,154 @@
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #2e1f47, #c64c4c);
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Floating Diamonds */
+.diamond {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.135);
+  transform: rotate(45deg);
+  animation: floatDiamond 10s infinite linear;
+  z-index: 0;
+}
+
+@keyframes floatDiamond {
+  0% {
+    transform: rotate(45deg) translateY(0);
+    opacity: 0.5;
+  }
+  50% {
+    transform: rotate(45deg) translateY(-40px);
+    opacity: 0.7;
+  }
+  100% {
+    transform: rotate(45deg) translateY(0);
+    opacity: 0.5;
+  }
+}
+
+/* Diamond Positions */
+.diamond:nth-child(1) { width: 30px; height: 30px; top: 5%; left: 5%; animation-delay: 0s; }
+.diamond:nth-child(2) { width: 40px; height: 40px; top: 10%; left: 90%; animation-delay: 1s; }
+.diamond:nth-child(3) { width: 25px; height: 25px; top: 85%; left: 10%; animation-delay: 2s; }
+.diamond:nth-child(4) { width: 35px; height: 35px; top: 80%; left: 85%; animation-delay: 3s; }
+.diamond:nth-child(5) { width: 50px; height: 50px; top: 20%; left: 5%; animation-delay: 4s; }
+.diamond:nth-child(6) { width: 20px; height: 20px; top: 75%; left: 95%; animation-delay: 5s; }
+.diamond:nth-child(7) { width: 45px; height: 45px; top: 0%; left: 50%; animation-delay: 6s; }
+.diamond:nth-child(8) { width: 30px; height: 30px; top: 100%; left: 50%; animation-delay: 7s; }
+.diamond:nth-child(9) { width: 35px; height: 35px; top: 40%; left: 0%; animation-delay: 8s; }
+.diamond:nth-child(10) { width: 25px; height: 25px; top: 60%; left: 100%; animation-delay: 9s; }
+.diamond:nth-child(11) { width: 40px; height: 40px; top: 5%; left: 70%; animation-delay: 10s; }
+.diamond:nth-child(12) { width: 30px; height: 30px; top: 95%; left: 30%; animation-delay: 11s; }
+.diamond:nth-child(13) { width: 20px; height: 20px; top: 30%; left: 100%; animation-delay: 12s; }
+.diamond:nth-child(14) { width: 30px; height: 30px; top: 70%; left: 0%; animation-delay: 13s; }
+.diamond:nth-child(15) { width: 50px; height: 50px; top: 10%; left: 30%; animation-delay: 14s; }
+.diamond:nth-child(16) { width: 40px; height: 40px; top: 90%; left: 70%; animation-delay: 15s; }
+.diamond:nth-child(17) { width: 25px; height: 25px; top: 50%; left: 5%; animation-delay: 16s; }
+.diamond:nth-child(18) { width: 35px; height: 35px; top: 50%; left: 95%; animation-delay: 17s; }
+.diamond:nth-child(19) { width: 30px; height: 30px; top: 15%; left: 50%; animation-delay: 18s; }
+.diamond:nth-child(20) { width: 30px; height: 30px; top: 85%; left: 50%; animation-delay: 19s; }
+.diamond:nth-child(21) { width: 40px; height: 40px; top: 50%; left: 85%; animation-delay: 20s; }
+
+/* Login Container */
+.container {
+  width: 700px; height: 400px;
+  display: flex;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(6px);
+  z-index: 1;
+}
+
+.left-side {
+  flex: 1;
+  background: #3a254f;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: #f97b7b;
+}
+
+.left-side .planet {
+  width: 120px; height: 120px;
+  background: radial-gradient(circle at 30% 30%, #f97b7b, #d04949);
+  border-radius: 50%;
+  margin-bottom: 20px;
+}
+
+.left-side h1 {
+  font-size: 24px;
+  letter-spacing: 4px;
+}
+
+.right-side {
+  flex: 1;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px;
+  color: #fff;
+}
+
+.right-side input {
+  padding: 10px; margin: 10px 0;
+  border: none;
+  border-bottom: 1px solid #ccc;
+  background: transparent;
+  color: #fff;
+  font-size: 14px;
+}
+
+.right-side input::placeholder {
+  color: #ccc;
+}
+
+.btn-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.btn-group button {
+  width: 48%;
+  padding: 10px;
+  background: #f97b7b;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.btn-group button:hover {
+  background: #e96a6a;
+  transform: translateY(-2px);
+}
+
+.right-side a {
+  margin-top: 20px; font-size: 12px;
+  color: #ccc; text-decoration: none;
+}
+
+.right-side a:hover {
+  text-decoration: underline;
+}
+
+#message {
+  color: yellow; margin-top: 10px; font-size: 14px;
+}
