@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
@@ -13,14 +14,14 @@ const app = express();
 // Session Middleware
 app.use(
   session({
-    secret: "your-very-strong-secret-key", // Hardcoded session secret (change for production)
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-      mongoUrl: "mongodb+srv://PJX_db_user:AWT%40976@awt-cluster.hhqsevw.mongodb.net/PJX?retryWrites=true&w=majority&appName=AWT-Cluster",
+      mongoUrl: process.env.MONGO_URI,
       collectionName: "sessions",
     }),
-    cookie: { 
+    cookie: {
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
       secure: false, // Set to true in production with HTTPS
     },
@@ -34,11 +35,8 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB Atlas connection
-const uri = "mongodb+srv://PJX_db_user:AWT%40976@awt-cluster.hhqsevw.mongodb.net/PJX?retryWrites=true&w=majority&appName=AWT-Cluster";
-mongoose.connect(uri, { 
-  useNewUrlParser: true, 
-  useUnifiedTopology: true 
-})
+const uri = process.env.MONGO_URI;
+mongoose.connect(uri)
   .then(() => console.log("✅ MongoDB connected!"))
   .catch(err => console.error("❌ MongoDB connection error:", err));
 
@@ -90,10 +88,10 @@ app.get("/guide-dashboard.html", isAuthenticated, (req, res) => {
 // Check session status
 app.get("/check-session", (req, res) => {
   if (req.session.userId) {
-    res.json({ 
-      success: true, 
-      userId: req.session.userId, 
-      role: req.session.role 
+    res.json({
+      success: true,
+      userId: req.session.userId,
+      role: req.session.role
     });
   } else {
     res.status(401).json({ success: false, message: "Not logged in" });
@@ -149,24 +147,24 @@ app.post("/signup", async (req, res) => {
 
     if (role === "student") {
       const studentID = await generateUniqueID("S", rollNumber, Student, "studentID");
-      newUser = new Student({ 
-        studentID, 
-        name, 
-        rollNumber, 
-        password,  
-        course, 
-        department 
+      newUser = new Student({
+        studentID,
+        name,
+        rollNumber,
+        password,
+        course,
+        department
       });
       await newUser.save();
       return res.json({ success: true, studentID });
     } else if (role === "guide") {
       const guideID = await generateUniqueID("G", rollNumber, Guide, "guideID");
-      newUser = new Guide({ 
-        guideID, 
-        name, 
-        rollNumber, 
-        password, 
-        course, 
+      newUser = new Guide({
+        guideID,
+        name,
+        rollNumber,
+        password,
+        course,
         department
       });
       await newUser.save();
@@ -183,9 +181,9 @@ app.post("/signup", async (req, res) => {
 // Projects
 app.get("/projects", isAuthenticated, async (req, res) => {
   try {
-    const guideID=req.session.userId;
+    const guideID = req.session.userId;
     console.log(guideID);
-    const projects = await Project.find({guideID});
+    const projects = await Project.find({ guideID });
 
     // console.log(projects);
     res.json(projects);
@@ -200,8 +198,8 @@ app.get("/projects/search", isAuthenticated, async (req, res) => {
     const projects = await Project.find({
       Title: { $regex: name, $options: 'i' }
     })
-    .select('Title currentStatus percentage')
-    .lean();
+      .select('Title currentStatus percentage')
+      .lean();
     res.json(projects);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -213,7 +211,7 @@ app.get("/projects/stats", isAuthenticated, async (req, res) => {
     const ongoing = await Project.countDocuments({ currentStatus: "In Progress" });
     const completed = await Project.countDocuments({ currentStatus: "Completed" });
     const pending = await Project.countDocuments({ currentStatus: "Pending" });
-    
+
     res.json({ ongoing, completed, pending });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -224,9 +222,9 @@ app.get("/projects/stats", isAuthenticated, async (req, res) => {
 // API endpoints
 app.get('/stud/projects', async (req, res) => {
   try {
-    const studentID=req.session.userId;
+    const studentID = req.session.userId;
     // console.log(studentID);
-    const projects = await Project.find({studentID});
+    const projects = await Project.find({ studentID });
     res.json(projects);
   } catch (err) {
     console.error('Error fetching projects:', err);
@@ -254,7 +252,7 @@ app.post('/stud/projects', async (req, res) => {
     console.log("HIIII");
     const lastProject = await Project.findOne().sort({ projectID: -1 });
     const newProjectID = lastProject ? lastProject.projectID + 1 : 1;
-    
+
     const projectData = {
       ...req.body,
       projectID: newProjectID
@@ -315,9 +313,9 @@ app.get('/guides', async (req, res) => {
 // Get all projects
 app.get('/projects', async (req, res) => {
   try {
-    const guideID=req.session.userId;
+    const guideID = req.session.userId;
     console.log(guideID);
-    const projects = await Project.find({guideID});
+    const projects = await Project.find({ guideID });
     res.json(projects);
   } catch (err) {
     console.error('Error fetching projects:', err);
@@ -412,12 +410,12 @@ app.post('/projects', async (req, res) => {
   try {
     const lastProject = await Project.findOne().sort({ projectID: -1 });
     const newProjectID = lastProject ? lastProject.projectID + 1 : 1;
-    
+
     const projectData = {
       ...req.body,
       projectID: newProjectID
     };
-    
+
     const project = new Project(projectData);
     await project.save();
     res.status(201).json(project);
@@ -508,11 +506,11 @@ app.get("/announcements", async (req, res) => {//, isAuthenticated to be added
 app.post("/announcements", isAuthenticated, async (req, res) => { //isAuthenticated, 
   try {
     console.log(req.session.userId);
-    const {guide_id,announcement_text}=req.body;
+    const { guide_id, announcement_text } = req.body;
     console.log(announcement_text);
-    const newAnn=new Announcement({
-        guide_id,
-        announcement_text
+    const newAnn = new Announcement({
+      guide_id,
+      announcement_text
     })
     await newAnn.save();
     res.json({ message: "Announcement added!" });
@@ -533,9 +531,9 @@ app.delete("/announcements/:id", isAuthenticated, async (req, res) => {
 // Todos
 app.get("/todos", isAuthenticated, async (req, res) => {
   try {
-    const guideId=req.session.userId;
-    const todos = await GuideTodo.find({guideID:guideId});
-    console.log("todos",todos)
+    const guideId = req.session.userId;
+    const todos = await GuideTodo.find({ guideID: guideId });
+    console.log("todos", todos)
     res.json(todos);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -544,12 +542,12 @@ app.get("/todos", isAuthenticated, async (req, res) => {
 
 app.post("/todos", isAuthenticated, async (req, res) => {
   try {
-    const {description}=req.body;
+    const { description } = req.body;
     // console.log(description);
-    const guideID=req.session.userId;
-    const newTodo=new GuideTodo({
-        guideID,
-        description:description
+    const guideID = req.session.userId;
+    const newTodo = new GuideTodo({
+      guideID,
+      description: description
     });
     // console.log(newTodo);
     await newTodo.save();
@@ -583,9 +581,9 @@ app.delete("/todos/:id", isAuthenticated, async (req, res) => {
 app.get('/reminders', async (req, res) => {
   try {
     console.log("HI");
-    const studentID=req.session.userId;
+    const studentID = req.session.userId;
     console.log(studentID);
-    const reminders = await Reminder.find({studentID});
+    const reminders = await Reminder.find({ studentID });
     res.json(reminders);
   } catch (err) {
     console.error(err);
@@ -595,14 +593,14 @@ app.get('/reminders', async (req, res) => {
 
 app.post("/reminders", async (req, res) => {
   try {
-    const studentID=req.session.userId;
-    const { day, month, year, reminder} = req.body;
+    const studentID = req.session.userId;
+    const { day, month, year, reminder } = req.body;
 
     if (!day || !month || !year || !reminder) {
       return res.status(400).json({ success: false, message: "Missing fields" });
     }
 
-    const newReminder = new Reminder({ day, month, year, reminder,studentID });
+    const newReminder = new Reminder({ day, month, year, reminder, studentID });
     await newReminder.save();
 
     res.json({ success: true, id: newReminder._id });
@@ -653,11 +651,11 @@ app.get("/stud/get-user", async (req, res) => {
 
     const student = await Student.findOne({ studentID }).select("studentID name");
 
-if (!student) {
-  return res.status(404).json({ error: "Student not found" });
-}
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
 
-res.json({ studentID: student.studentID, name: student.name });;
+    res.json({ studentID: student.studentID, name: student.name });;
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Error fetching user" });
@@ -665,7 +663,7 @@ res.json({ studentID: student.studentID, name: student.name });;
 });
 
 // Start Server
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
